@@ -10,20 +10,30 @@ export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [planos, setPlanos] = useState<Plano[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ nome: "", email: "", planId: "" });
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
       fetch("/api/admin/clientes").then((r) => r.json()),
       fetch("/api/admin/planos").then((r) => r.json()),
-    ]).then(([c, p]) => { setClientes(c); setPlanos(p); setLoading(false); });
+    ])
+      .then(([c, p]) => {
+        if (c?.error) throw new Error(c.error);
+        setClientes(Array.isArray(c) ? c : []);
+        setPlanos(Array.isArray(p) ? p : []);
+        setLoading(false);
+      })
+      .catch((err) => { setLoadError(err.message); setLoading(false); });
   }, []);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setSaveError(null);
     try {
       const res = await fetch("/api/admin/clientes", {
         method: "POST",
@@ -31,9 +41,12 @@ export default function ClientesPage() {
         body: JSON.stringify({ nome: form.nome, email: form.email, planId: form.planId || null }),
       });
       const novo = await res.json();
+      if (!res.ok) throw new Error(novo?.error ?? `Erro ${res.status}`);
       setClientes((prev) => [novo, ...prev]);
       setForm({ nome: "", email: "", planId: "" });
       setShowForm(false);
+    } catch (err: unknown) {
+      setSaveError(err instanceof Error ? err.message : "Erro ao salvar");
     } finally {
       setSaving(false);
     }
@@ -111,6 +124,7 @@ export default function ClientesPage() {
                 {planos.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
               </select>
             </div>
+            {saveError && <p className="text-red-400 text-sm font-semibold">{saveError}</p>}
             <div className="flex gap-3">
               <button type="submit" disabled={saving} className="bg-white text-gray-900 font-bold px-6 py-2.5 rounded-xl text-sm hover:bg-gray-100 disabled:opacity-60 transition">
                 {saving ? "Salvando..." : "Criar conta"}
@@ -122,6 +136,11 @@ export default function ClientesPage() {
           </form>
         )}
 
+        {loadError && (
+          <div className="bg-red-900/30 border border-red-800 rounded-xl px-6 py-4 mb-4 text-red-400 text-sm font-semibold">
+            Erro ao carregar: {loadError}
+          </div>
+        )}
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white" />
