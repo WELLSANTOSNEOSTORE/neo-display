@@ -16,14 +16,18 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   if (!isAdmin(req)) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  const { nome, email, planId } = await req.json();
-  if (!nome || !email) return NextResponse.json({ error: "nome e email obrigatórios" }, { status: 400 });
-
-  const tenant = await prisma.tenant.create({
-    data: { nome, email, planId: planId ? Number(planId) : null },
-    include: { plan: true },
-  });
-  return NextResponse.json(tenant);
+  try {
+    const { nome, email, planId } = await req.json();
+    if (!nome || !email) return NextResponse.json({ error: "nome e email obrigatórios" }, { status: 400 });
+    const tenant = await prisma.tenant.create({
+      data: { nome, email, planId: planId ? Number(planId) : null },
+      include: { plan: true },
+    });
+    return NextResponse.json(tenant);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Erro interno";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
 
 export async function PATCH(req: NextRequest) {
