@@ -1,0 +1,212 @@
+"use client";
+
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import Image from "next/image";
+
+type SalaId = "inter" | "rooftop";
+
+interface SalaConfig {
+  salaId: SalaId;
+  mensagemBoasVindas: string;
+  logoCliente: string | null;
+  nomeCliente: string | null;
+  mostrarInfoEvento: boolean;
+  videoUrl: string | null;
+  mostrarVideo: boolean;
+  orientacao: string;
+}
+
+const DURATIONS = [6000, 5000, 5000, 15000];
+const NOME_SALA: Record<string, string> = { inter: "SALA INTER", rooftop: "SALA ROOFTOP" };
+const W = 1920, H = 1080, WP = 1080, HP = 1920;
+
+export default function TelaPage() {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const sala = params.sala as string;
+  const tenantId = searchParams.get("tenantId");
+
+  const [config, setConfig] = useState<SalaConfig | null>(null);
+  const [slide, setSlide] = useState(0);
+  const [scale, setScale] = useState(1);
+
+  const isPortrait = config?.orientacao === "portrait";
+  const advanceSlide = useCallback((total: number) => setSlide((p) => (p + 1) % total), []);
+
+  useEffect(() => {
+    function updateScale() {
+      const portrait = config?.orientacao === "portrait";
+      const cW = portrait ? WP : W, cH = portrait ? HP : H;
+      setScale(Math.min(window.innerWidth / cW, window.innerHeight / cH));
+    }
+    updateScale();
+    window.addEventListener("resize", updateScale);
+    return () => window.removeEventListener("resize", updateScale);
+  }, [config?.orientacao]);
+
+  const fetchConfig = useCallback(async () => {
+    try {
+      const tid = tenantId ? `&tenantId=${tenantId}` : "";
+      const res = await fetch(`/api/sala?salaId=${sala}${tid}`, { cache: "no-store" });
+      setConfig(await res.json());
+    } catch { /* mantém config anterior */ }
+  }, [sala, tenantId]);
+
+  useEffect(() => {
+    fetchConfig();
+    const iv = setInterval(fetchConfig, 30_000);
+    return () => clearInterval(iv);
+  }, [fetchConfig]);
+
+  useEffect(() => {
+    const total = 2 + (config?.mostrarInfoEvento ? 1 : 0) + (config?.mostrarVideo && config?.videoUrl ? 1 : 0);
+    const slideVideo = (config?.mostrarInfoEvento ? 3 : 2);
+    if (config?.mostrarVideo && config?.videoUrl && slide === slideVideo) return;
+    const t = setTimeout(() => advanceSlide(total), (DURATIONS[slide] ?? 5000) - 500);
+    return () => clearTimeout(t);
+  }, [slide, config?.mostrarInfoEvento, config?.mostrarVideo, config?.videoUrl, advanceSlide]);
+
+  if (!config) return (
+    <div className="w-screen h-screen bg-black flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
+    </div>
+  );
+
+  const totalSlides = 2 + (config.mostrarInfoEvento ? 1 : 0) + (config.mostrarVideo && config.videoUrl ? 1 : 0);
+  const slideEvento = 2;
+  const slideVideo = config.mostrarInfoEvento ? 3 : 2;
+  const nomeSala = NOME_SALA[sala] ?? "SALA";
+
+  return (
+    <div className="w-screen h-screen overflow-hidden bg-black" style={{ position: "relative" }}>
+      <div style={{
+        width: isPortrait ? WP : W, height: isPortrait ? HP : H,
+        position: "absolute", top: "50%", left: "50%",
+        marginLeft: isPortrait ? -WP / 2 : -W / 2,
+        marginTop: isPortrait ? -HP / 2 : -H / 2,
+        transform: `scale(${scale})`, transformOrigin: "center center", overflow: "hidden",
+      }}>
+        <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+          <Slide1 mensagem={config.mensagemBoasVindas} active={slide === 0} />
+        </div>
+        <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 1 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+          <Slide2 nomeSala={nomeSala} />
+        </div>
+        {config.mostrarInfoEvento && (
+          <div className={`absolute inset-0 transition-opacity duration-500 ${slide === slideEvento ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+            <Slide3 logoCliente={config.logoCliente} nomeCliente={config.nomeCliente} nomeSala={nomeSala} />
+          </div>
+        )}
+        {config.mostrarVideo && config.videoUrl && (
+          <div className={`absolute inset-0 transition-opacity duration-500 ${slide === slideVideo ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+            <SlideVideo videoUrl={config.videoUrl} active={slide === slideVideo} onEnded={() => advanceSlide(totalSlides)} />
+          </div>
+        )}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-50">
+          {Array.from({ length: totalSlides }).map((_, i) => (
+            <div key={i} className={`rounded-full transition-all duration-300 ${slide === i ? "w-6 h-2 bg-white" : "w-2 h-2 bg-white/40"}`} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Slide1({ mensagem, active }: { mensagem: string; active: boolean }) {
+  const [colored, setColored] = useState(false);
+  useEffect(() => {
+    if (!active) { setColored(false); return; }
+    const t = setTimeout(() => setColored(true), 800);
+    return () => clearTimeout(t);
+  }, [active]);
+
+  return (
+    <div className="w-full h-full relative flex items-center justify-center">
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/images/mural-bg.jpg')" }} />
+      <div className="absolute inset-0 transition-all duration-[3000ms] ease-in-out" style={{
+        background: colored
+          ? "linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 60%, #533483 100%)"
+          : "linear-gradient(135deg, #000 0%, #1a1a1a 50%, #2a2a2a 100%)",
+      }} />
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute transition-all duration-[3000ms] ease-in-out" style={{
+          top: "-20%", right: "-10%", width: "70%", height: "70%",
+          borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
+          background: colored ? "radial-gradient(circle, rgba(232,68,10,0.45) 0%, rgba(255,140,0,0.2) 50%, transparent 70%)" : "radial-gradient(circle, rgba(60,60,60,0.3) 0%, transparent 70%)",
+          filter: "blur(40px)",
+        }} />
+        <div className="absolute transition-all duration-[3000ms] ease-in-out delay-300" style={{
+          bottom: "5%", left: "-5%", width: "55%", height: "55%",
+          borderRadius: "30% 70% 70% 30% / 30% 30% 70% 70%",
+          background: colored ? "radial-gradient(circle, rgba(83,52,131,0.5) 0%, rgba(232,68,10,0.2) 50%, transparent 70%)" : "radial-gradient(circle, rgba(30,30,30,0.3) 0%, transparent 70%)",
+          filter: "blur(50px)",
+        }} />
+        <svg className="absolute inset-0 w-full h-full opacity-[0.06]" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+          {Array.from({ length: 9 }).map((_, i) => <line key={i} x1={-200 + i * 170} y1="0" x2={100 + i * 170} y2="800" stroke="white" strokeWidth="1.5" />)}
+        </svg>
+      </div>
+      <div className="relative z-10 w-full flex flex-col items-center justify-center text-center px-8">
+        <h1 className="text-8xl font-black text-white leading-none tracking-tight" style={{ textShadow: "0 4px 32px rgba(0,0,0,0.9)" }}>
+          {mensagem.split(/[\n\r]/)[0].trim()}
+        </h1>
+      </div>
+    </div>
+  );
+}
+
+function Slide2({ nomeSala }: { nomeSala: string }) {
+  return (
+    <div className="w-full h-full relative flex items-center justify-center" style={{ backgroundColor: "#E8440A" }}>
+      <div className="absolute top-10 left-14 flex flex-col items-start">
+        <span className="text-green-400 text-7xl font-black leading-none">«</span>
+        <p className="text-white font-black text-5xl leading-tight mt-1 tracking-wide">{nomeSala}</p>
+      </div>
+      <div className="flex justify-center items-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/ibis-logo.jpeg" alt="ibis" className="object-contain h-48" />
+      </div>
+      <div className="absolute bottom-10 right-14 flex flex-col items-end">
+        <p className="text-white font-black text-5xl leading-tight mb-1 tracking-wide text-right">BANHEIROS</p>
+        <span className="text-yellow-300 text-7xl font-black leading-none">»</span>
+      </div>
+    </div>
+  );
+}
+
+function Slide3({ logoCliente, nomeCliente, nomeSala }: { logoCliente: string | null; nomeCliente: string | null; nomeSala: string }) {
+  return (
+    <div className="w-full h-full bg-white flex flex-col items-center justify-center gap-8 px-20">
+      {logoCliente ? (
+        <div className="flex-1 flex items-center justify-center w-full min-h-0 py-8">
+          <Image src={logoCliente} alt={nomeCliente ?? "Logo"} width={900} height={500} className="object-contain w-full h-full" style={{ maxHeight: "60vh" }} unoptimized priority />
+        </div>
+      ) : (
+        <div className="w-72 h-36 rounded-2xl bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
+          <p className="text-gray-400 text-sm font-medium">Logo do cliente</p>
+        </div>
+      )}
+      <div className="text-center shrink-0">
+        {nomeCliente && <p className="text-3xl text-gray-400 font-light mb-3">{nomeCliente}</p>}
+        <div className="inline-flex items-center gap-4">
+          <div className="h-px w-16 bg-[#E8440A]" />
+          <p className="text-5xl font-black text-gray-800 tracking-wide">{nomeSala}</p>
+          <div className="h-px w-16 bg-[#E8440A]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SlideVideo({ videoUrl, active, onEnded }: { videoUrl: string; active: boolean; onEnded: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (active) videoRef.current?.play().catch(() => {});
+    else { videoRef.current?.pause(); if (videoRef.current) videoRef.current.currentTime = 0; }
+  }, [active]);
+  return (
+    <div className="w-full h-full bg-black">
+      <video ref={videoRef} src={videoUrl} muted playsInline onEnded={onEnded} className="w-full h-full object-cover" />
+    </div>
+  );
+}

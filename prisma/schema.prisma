@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Plan {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  descricao String?
+  ativo     Boolean  @default(true)
+  tenants   Tenant[]
+  createdAt DateTime @default(now())
+}
+
+model Tenant {
+  id        String       @id @default(cuid())
+  nome      String
+  email     String       @unique
+  ativo     Boolean      @default(true)
+  planId    Int?
+  plan      Plan?        @relation(fields: [planId], references: [id])
+  salas     SalaConfig[]
+  logos     LogoLibrary[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model SalaConfig {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  salaId             String
+  mensagemBoasVindas String   @default("BEM-VINDO!")
+  logoCliente        String?
+  nomeCliente        String?
+  mostrarInfoEvento  Boolean  @default(true)
+  videoUrl           String?
+  mostrarVideo       Boolean  @default(false)
+  orientacao         String   @default("landscape")
+  updatedAt          DateTime @updatedAt
+  createdAt          DateTime @default(now())
+
+  @@unique([tenantId, salaId])
+}
+
+model LogoLibrary {
+  id        Int      @id @default(autoincrement())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  nome      String
+  url       String
+  createdAt DateTime @default(now())
+}
