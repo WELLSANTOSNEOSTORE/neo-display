@@ -129,7 +129,7 @@ function Slide2({ nomeSala: _ }: { nomeSala: string }) {
   return (
     <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: "#E8440A" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/images/ibis-logo.png" alt="ibis" className="object-contain h-96" style={{ mixBlendMode: "multiply" }} />
+      <img src="/images/ibis-logo.png" alt="ibis" className="object-contain h-96" />
     </div>
   );
 }
