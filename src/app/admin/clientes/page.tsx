@@ -192,7 +192,6 @@ export default function ClientesPage() {
                       </button>
                     </div>
                   )}
-                  <p className="text-xs text-gray-500 truncate">{c.email}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   {c.plan && (
