@@ -1,24 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-async function getTenantId(req: NextRequest): Promise<string | null> {
-  const session = await auth();
-  if (session) {
-    return (session as unknown as Record<string, string>).tenantId ?? null;
-  }
-  // Admin impersonando um tenant via query param
-  const tid = req.nextUrl.searchParams.get("tenantId");
-  const neoAuth = req.cookies.get("neo_auth")?.value;
-  if (neoAuth === "ok" && tid) return tid;
-  return null;
+function isAdmin(req: NextRequest) {
+  return req.cookies.get("neo_auth")?.value === "ok";
 }
 
+// GET é público — tela do hotel lê sem precisar de cookie
 export async function GET(req: NextRequest) {
-  const tenantId = await getTenantId(req);
-  if (!tenantId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-
+  const tenantId = req.nextUrl.searchParams.get("tenantId");
   const salaId = req.nextUrl.searchParams.get("salaId");
+
+  if (!tenantId) return NextResponse.json({ error: "tenantId obrigatório" }, { status: 400 });
   if (!salaId || !["inter", "rooftop"].includes(salaId)) {
     return NextResponse.json({ error: "salaId inválido" }, { status: 400 });
   }
@@ -31,9 +23,12 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(config);
 }
 
+// POST exige cookie de admin
 export async function POST(req: NextRequest) {
-  const tenantId = await getTenantId(req);
-  if (!tenantId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!isAdmin(req)) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+
+  const tenantId = req.nextUrl.searchParams.get("tenantId");
+  if (!tenantId) return NextResponse.json({ error: "tenantId obrigatório" }, { status: 400 });
 
   const body = await req.json();
   const { salaId, mensagemBoasVindas, logoCliente, nomeCliente, mostrarInfoEvento, videoUrl, mostrarVideo, orientacao } = body;
