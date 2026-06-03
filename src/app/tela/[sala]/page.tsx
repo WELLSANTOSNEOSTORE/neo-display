@@ -113,41 +113,11 @@ export default function TelaPage() {
   );
 }
 
-function Slide1({ mensagem, active }: { mensagem: string; active: boolean }) {
-  const [colored, setColored] = useState(false);
-  useEffect(() => {
-    if (!active) { setColored(false); return; }
-    const t = setTimeout(() => setColored(true), 800);
-    return () => clearTimeout(t);
-  }, [active]);
-
+function Slide1({ mensagem }: { mensagem: string; active: boolean }) {
   return (
-    <div className="w-full h-full relative flex items-center justify-center">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/images/mural-bg.jpg')" }} />
-      <div className="absolute inset-0 transition-all duration-[3000ms] ease-in-out" style={{
-        background: colored
-          ? "linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 60%, #533483 100%)"
-          : "linear-gradient(135deg, #000 0%, #1a1a1a 50%, #2a2a2a 100%)",
-      }} />
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute transition-all duration-[3000ms] ease-in-out" style={{
-          top: "-20%", right: "-10%", width: "70%", height: "70%",
-          borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
-          background: colored ? "radial-gradient(circle, rgba(232,68,10,0.45) 0%, rgba(255,140,0,0.2) 50%, transparent 70%)" : "radial-gradient(circle, rgba(60,60,60,0.3) 0%, transparent 70%)",
-          filter: "blur(40px)",
-        }} />
-        <div className="absolute transition-all duration-[3000ms] ease-in-out delay-300" style={{
-          bottom: "5%", left: "-5%", width: "55%", height: "55%",
-          borderRadius: "30% 70% 70% 30% / 30% 30% 70% 70%",
-          background: colored ? "radial-gradient(circle, rgba(83,52,131,0.5) 0%, rgba(232,68,10,0.2) 50%, transparent 70%)" : "radial-gradient(circle, rgba(30,30,30,0.3) 0%, transparent 70%)",
-          filter: "blur(50px)",
-        }} />
-        <svg className="absolute inset-0 w-full h-full opacity-[0.06]" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
-          {Array.from({ length: 9 }).map((_, i) => <line key={i} x1={-200 + i * 170} y1="0" x2={100 + i * 170} y2="800" stroke="white" strokeWidth="1.5" />)}
-        </svg>
-      </div>
+    <div className="w-full h-full relative flex items-center justify-center bg-white">
       <div className="relative z-10 w-full flex flex-col items-center justify-center text-center px-8">
-        <h1 className="text-8xl font-black text-white leading-none tracking-tight" style={{ textShadow: "0 4px 32px rgba(0,0,0,0.9)" }}>
+        <h1 className="text-8xl font-black text-black leading-none tracking-tight">
           {mensagem.split(/[\n\r]/)[0].trim()}
         </h1>
       </div>
