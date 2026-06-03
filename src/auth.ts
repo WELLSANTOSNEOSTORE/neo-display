@@ -6,6 +6,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [Google],
   pages: { signIn: "/entrar" },
   callbacks: {
+    async signIn({ user }) {
+      return user.email === "well.neostore@gmail.com";
+    },
     async session({ session, token }) {
       if (token.email) {
         const tenant = await prisma.tenant.findUnique({
