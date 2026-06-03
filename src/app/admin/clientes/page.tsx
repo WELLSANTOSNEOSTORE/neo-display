@@ -15,6 +15,8 @@ export default function ClientesPage() {
   const [form, setForm] = useState({ nome: "", email: "", planId: "" });
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingNome, setEditingNome] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -66,6 +68,18 @@ export default function ClientesPage() {
     if (!confirm("Excluir este cliente? Todos os dados serão apagados.")) return;
     await fetch(`/api/admin/clientes?id=${id}`, { method: "DELETE" });
     setClientes((prev) => prev.filter((c) => c.id !== id));
+  }
+
+  async function handleRename(id: string) {
+    if (!editingNome.trim()) return;
+    const res = await fetch("/api/admin/clientes", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, nome: editingNome.trim() }),
+    });
+    const atualizado = await res.json();
+    setClientes((prev) => prev.map((c) => (c.id === atualizado.id ? atualizado : c)));
+    setEditingId(null);
   }
 
   return (
@@ -158,7 +172,26 @@ export default function ClientesPage() {
                   <span className="text-xs font-black text-gray-400">{c.nome.slice(0, 2).toUpperCase()}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-white truncate">{c.nome}</p>
+                  {editingId === c.id ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        autoFocus
+                        value={editingNome}
+                        onChange={(e) => setEditingNome(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") handleRename(c.id); if (e.key === "Escape") setEditingId(null); }}
+                        className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-1 text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-white w-48"
+                      />
+                      <button onClick={() => handleRename(c.id)} className="text-xs bg-white text-gray-900 font-bold px-3 py-1 rounded-lg hover:bg-gray-200 transition">Salvar</button>
+                      <button onClick={() => setEditingId(null)} className="text-xs text-gray-500 hover:text-white transition">Cancelar</button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-white truncate">{c.nome}</p>
+                      <button onClick={() => { setEditingId(c.id); setEditingNome(c.nome); }} className="text-gray-600 hover:text-white transition" title="Editar nome">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 012.828 2.828L11.828 15.828a2 2 0 01-1.414.586H8v-2.414a2 2 0 01.586-1.414z" /></svg>
+                      </button>
+                    </div>
+                  )}
                   <p className="text-xs text-gray-500 truncate">{c.email}</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -171,14 +204,12 @@ export default function ClientesPage() {
                   >
                     {c.ativo ? "Ativo" : "Inativo"}
                   </button>
-                  <Link
-                    href={`/painel?tenantId=${c.id}`}
-                    target="_blank"
-                    className="text-xs text-gray-500 hover:text-white transition"
-                  >
+                  <Link href={`/painel?tenantId=${c.id}`} target="_blank" className="text-xs text-gray-500 hover:text-white transition">
                     Ver painel
                   </Link>
-                  <button onClick={() => handleDelete(c.id)} className="text-xs text-gray-600 hover:text-red-400 transition">✕</button>
+                  <button onClick={() => handleDelete(c.id)} className="text-gray-700 hover:text-red-400 transition" title="Excluir cliente">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0a1 1 0 00-1-1h-4a1 1 0 00-1 1m-4 0h10" /></svg>
+                  </button>
                 </div>
               </div>
             ))}
