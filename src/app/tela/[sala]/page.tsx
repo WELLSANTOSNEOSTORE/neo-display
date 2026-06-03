@@ -77,6 +77,7 @@ export default function TelaPage() {
   const slideEvento = 2;
   const slideVideo = config.mostrarInfoEvento ? 3 : 2;
   const nomeSala = NOME_SALA[sala] ?? "SALA";
+  const slideClaro = slide === 0 || (config.mostrarInfoEvento && slide === slideEvento);
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-black" style={{ position: "relative" }}>
@@ -88,10 +89,10 @@ export default function TelaPage() {
         transform: `scale(${scale})`, transformOrigin: "center center", overflow: "hidden",
       }}>
         <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-          <Slide1 mensagem={config.mensagemBoasVindas} active={slide === 0} />
+          <Slide1 mensagem={config.mensagemBoasVindas} />
         </div>
         <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 1 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-          <Slide2 nomeSala={nomeSala} />
+          <Slide2 />
         </div>
         {config.mostrarInfoEvento && (
           <div className={`absolute inset-0 transition-opacity duration-500 ${slide === slideEvento ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
@@ -105,7 +106,7 @@ export default function TelaPage() {
         )}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-50">
           {Array.from({ length: totalSlides }).map((_, i) => (
-            <div key={i} className={`rounded-full transition-all duration-300 ${slide === i ? "w-6 h-2 bg-white" : "w-2 h-2 bg-white/40"}`} />
+            <div key={i} className={`rounded-full transition-all duration-300 ${slide === i ? `w-6 h-2 ${slideClaro ? "bg-black" : "bg-white"}` : `w-2 h-2 ${slideClaro ? "bg-black/30" : "bg-white/40"}`}`} />
           ))}
         </div>
       </div>
@@ -113,7 +114,7 @@ export default function TelaPage() {
   );
 }
 
-function Slide1({ mensagem }: { mensagem: string; active: boolean }) {
+function Slide1({ mensagem }: { mensagem: string }) {
   return (
     <div className="w-full h-full relative flex items-center justify-center bg-white">
       <div className="relative z-10 w-full flex flex-col items-center justify-center text-center px-8">
@@ -125,7 +126,7 @@ function Slide1({ mensagem }: { mensagem: string; active: boolean }) {
   );
 }
 
-function Slide2({ nomeSala: _ }: { nomeSala: string }) {
+function Slide2() {
   return (
     <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: "#E8440A" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
