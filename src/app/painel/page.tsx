@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
 import { upload } from "@vercel/blob/client";
-import { useSession, signOut } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 
 type SalaId = "inter" | "rooftop";
@@ -36,11 +35,8 @@ export default function PainelPage() {
 }
 
 function PainelContent() {
-  const { data: session } = useSession();
   const searchParams = useSearchParams();
-  // Admin pode impersonar um tenant via ?tenantId=
   const tenantIdParam = searchParams.get("tenantId");
-  const isAdmin = !session;
 
   const [sala, setSala] = useState<SalaId>("inter");
   const [config, setConfig] = useState<SalaConfig>(defaultConfig("inter"));
@@ -139,8 +135,7 @@ function PainelContent() {
     }
   }
 
-  const tenantNome = (session as unknown as Record<string, string>)?.tenantNome ?? "Meu Hotel";
-  const planNome = (session as unknown as Record<string, string>)?.planNome ?? null;
+  const tenantNome = "Meu Hotel";
   const nomeSala = sala === "inter" ? "Sala Inter" : "Sala Rooftop";
   const telaUrl = tenantIdParam
     ? `/tela/${sala}?tenantId=${tenantIdParam}`
@@ -157,22 +152,10 @@ function PainelContent() {
             <div>
               <p className="text-[10px] text-gray-400 uppercase tracking-widest leading-none">Neo Display</p>
               <p className="text-lg font-black text-gray-800 leading-tight">{tenantNome}</p>
-              {planNome && <p className="text-[10px] text-gray-500 tracking-wider leading-none">{planNome.toUpperCase()}</p>}
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {session?.user?.image && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={session.user.image} alt="" className="w-8 h-8 rounded-full" />
-            )}
-            <div className="text-right">
-              {session?.user?.name && <p className="text-xs font-semibold text-gray-700 leading-none">{session.user.name}</p>}
-              {isAdmin ? (
-                <a href="/admin/clientes" className="text-[10px] text-gray-400 hover:text-gray-700 transition uppercase tracking-widest">← Admin</a>
-              ) : (
-                <button onClick={() => signOut({ callbackUrl: "/entrar" })} className="text-[10px] text-gray-400 hover:text-red-400 transition uppercase tracking-widest">Sair</button>
-              )}
-            </div>
+            <a href="/admin/clientes" className="text-[10px] text-gray-400 hover:text-gray-700 transition uppercase tracking-widest">← Admin</a>
           </div>
         </div>
       </header>
