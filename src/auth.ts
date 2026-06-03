@@ -7,7 +7,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: { signIn: "/entrar" },
   callbacks: {
     async signIn({ user }) {
-      return user.email === "well.neostore@gmail.com";
+      const allowed = [
+        "well.neostore@gmail.com",
+        "neostoreeventos@gmail.com",
+      ];
+      return !!user.email && allowed.includes(user.email);
     },
     async session({ session, token }) {
       if (token.email) {
