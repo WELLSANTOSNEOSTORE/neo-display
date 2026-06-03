@@ -125,21 +125,11 @@ function Slide1({ mensagem }: { mensagem: string; active: boolean }) {
   );
 }
 
-function Slide2({ nomeSala }: { nomeSala: string }) {
+function Slide2({ nomeSala: _ }: { nomeSala: string }) {
   return (
-    <div className="w-full h-full relative flex items-center justify-center" style={{ backgroundColor: "#E8440A" }}>
-      <div className="absolute top-10 left-14 flex flex-col items-start">
-        <span className="text-green-400 text-7xl font-black leading-none">«</span>
-        <p className="text-white font-black text-5xl leading-tight mt-1 tracking-wide">{nomeSala}</p>
-      </div>
-      <div className="flex justify-center items-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/ibis-logo.png" alt="ibis" className="object-contain h-96" />
-      </div>
-      <div className="absolute bottom-10 right-14 flex flex-col items-end">
-        <p className="text-white font-black text-5xl leading-tight mb-1 tracking-wide text-right">BANHEIROS</p>
-        <span className="text-yellow-300 text-7xl font-black leading-none">»</span>
-      </div>
+    <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: "#E8440A" }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/images/ibis-logo.png" alt="ibis" className="object-contain h-96" />
     </div>
   );
 }
