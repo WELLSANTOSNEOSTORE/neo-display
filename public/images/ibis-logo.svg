@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <rect width="300" height="300" fill="#e8e8e8"/>
+  <path d="M 58,14 Q 150,36 242,14 Q 286,58 264,150 Q 286,242 242,286 Q 150,264 58,286 Q 14,242 36,150 Q 14,58 58,14 Z" fill="#6ab023"/>
+  <text x="150" y="148" text-anchor="middle" fill="white" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="72" letter-spacing="-1">ibis</text>
+  <text x="150" y="208" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="400" font-size="50" letter-spacing="1">STYLES</text>
+</svg>
