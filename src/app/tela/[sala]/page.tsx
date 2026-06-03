@@ -164,7 +164,7 @@ function Slide2({ nomeSala }: { nomeSala: string }) {
       </div>
       <div className="flex justify-center items-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/ibis-logo.png" alt="ibis" className="object-contain h-48" />
+        <img src="/images/ibis-logo.png" alt="ibis" className="object-contain h-96" />
       </div>
       <div className="absolute bottom-10 right-14 flex flex-col items-end">
         <p className="text-white font-black text-5xl leading-tight mb-1 tracking-wide text-right">BANHEIROS</p>
