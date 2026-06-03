@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-async function getTenantId(req: NextRequest): Promise<string | null> {
-  const session = await auth();
-  if (session) return (session as unknown as Record<string, string>).tenantId ?? null;
-  const tid = req.nextUrl.searchParams.get("tenantId");
-  const neoAuth = req.cookies.get("neo_auth")?.value;
-  if (neoAuth === "ok" && tid) return tid;
-  return null;
+function isAdmin(req: NextRequest) {
+  return req.cookies.get("neo_auth")?.value === "ok";
+}
+
+function getTenantId(req: NextRequest): string | null {
+  return req.nextUrl.searchParams.get("tenantId");
 }
 
 export async function GET(req: NextRequest) {
-  const tenantId = await getTenantId(req);
-  if (!tenantId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!isAdmin(req)) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const tenantId = getTenantId(req);
+  if (!tenantId) return NextResponse.json({ error: "tenantId obrigatório" }, { status: 400 });
 
   const [logos, salas] = await Promise.all([
     prisma.logoLibrary.findMany({ where: { tenantId }, orderBy: { nome: "asc" } }),
@@ -32,8 +31,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const tenantId = await getTenantId(req);
-  if (!tenantId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!isAdmin(req)) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const tenantId = getTenantId(req);
+  if (!tenantId) return NextResponse.json({ error: "tenantId obrigatório" }, { status: 400 });
 
   const { nome, url } = await req.json();
   if (!nome || !url) return NextResponse.json({ error: "nome e url obrigatórios" }, { status: 400 });
@@ -43,8 +43,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const tenantId = await getTenantId(req);
-  if (!tenantId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!isAdmin(req)) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const tenantId = getTenantId(req);
+  if (!tenantId) return NextResponse.json({ error: "tenantId obrigatório" }, { status: 400 });
 
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id obrigatório" }, { status: 400 });
