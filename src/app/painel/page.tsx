@@ -179,7 +179,7 @@ function PainelContent() {
 
       <main className="max-w-2xl mx-auto px-6 py-10">
         <div className="mb-8">
-          <h1 className="text-3xl font-black text-gray-800 tracking-tight">OLÁ, {tenantNome.toUpperCase()}</h1>
+          <h1 className="text-3xl font-black text-gray-800 tracking-tight">OLÁ, IBIS HOTEL</h1>
           <p className="text-gray-400 text-sm mt-1">Configure as informações exibidas na tela de cada sala.</p>
         </div>
 
