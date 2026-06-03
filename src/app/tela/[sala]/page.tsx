@@ -157,7 +157,6 @@ function Slide3({ logoCliente, nomeCliente, nomeSala }: { logoCliente: string | 
         </div>
       )}
       <div className="text-center shrink-0">
-        {nomeCliente && <p className="text-3xl text-gray-400 font-light mb-3">{nomeCliente}</p>}
         <div className="inline-flex items-center gap-4">
           <div className="h-px w-16 bg-[#E8440A]" />
           <p className="text-5xl font-black text-gray-800 tracking-wide">{nomeSala}</p>
