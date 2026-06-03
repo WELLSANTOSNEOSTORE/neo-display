@@ -74,10 +74,9 @@ export default function TelaPage() {
   );
 
   const totalSlides = 2 + (config.mostrarInfoEvento ? 1 : 0) + (config.mostrarVideo && config.videoUrl ? 1 : 0);
-  const slideEvento = 2;
   const slideVideo = config.mostrarInfoEvento ? 3 : 2;
   const nomeSala = NOME_SALA[sala] ?? "SALA";
-  const slideClaro = slide === 0 || (config.mostrarInfoEvento && slide === slideEvento);
+  const slideClaro = slide === 0 || (config.mostrarInfoEvento && slide === 2);
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-black" style={{ position: "relative" }}>
@@ -95,8 +94,8 @@ export default function TelaPage() {
           <Slide2 />
         </div>
         {config.mostrarInfoEvento && (
-          <div className={`absolute inset-0 transition-opacity duration-500 ${slide === slideEvento ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-            <Slide3 logoCliente={config.logoCliente} nomeCliente={config.nomeCliente} nomeSala={nomeSala} />
+          <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 2 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+            <Slide3 logoCliente={config.logoCliente} nomeSala={nomeSala} />
           </div>
         )}
         {config.mostrarVideo && config.videoUrl && (
@@ -116,12 +115,10 @@ export default function TelaPage() {
 
 function Slide1({ mensagem }: { mensagem: string }) {
   return (
-    <div className="w-full h-full relative flex items-center justify-center bg-white">
-      <div className="relative z-10 w-full flex flex-col items-center justify-center text-center px-8">
-        <h1 className="text-8xl font-black text-black leading-none tracking-tight">
-          {mensagem.split(/[\n\r]/)[0].trim()}
-        </h1>
-      </div>
+    <div className="w-full h-full flex items-center justify-center bg-white px-8">
+      <h1 className="text-8xl font-black text-black leading-none tracking-tight text-center">
+        {mensagem.split(/[\n\r]/)[0].trim()}
+      </h1>
     </div>
   );
 }
@@ -135,12 +132,12 @@ function Slide2() {
   );
 }
 
-function Slide3({ logoCliente, nomeCliente, nomeSala }: { logoCliente: string | null; nomeCliente: string | null; nomeSala: string }) {
+function Slide3({ logoCliente, nomeSala }: { logoCliente: string | null; nomeSala: string }) {
   return (
     <div className="w-full h-full bg-white flex flex-col items-center justify-center gap-8 px-20">
       {logoCliente ? (
         <div className="flex-1 flex items-center justify-center w-full min-h-0 py-8">
-          <Image src={logoCliente} alt={nomeCliente ?? "Logo"} width={900} height={500} className="object-contain w-full h-full" style={{ maxHeight: "60vh" }} unoptimized priority />
+          <Image src={logoCliente} alt="Logo" width={900} height={500} className="object-contain w-full h-full" style={{ maxHeight: "60vh" }} unoptimized priority />
         </div>
       ) : (
         <div className="w-72 h-36 rounded-2xl bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
