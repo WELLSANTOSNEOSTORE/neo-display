@@ -62,16 +62,17 @@ function PainelContent() {
     setLoading(true);
     try {
       const res = await fetch(`/api/sala?salaId=${salaId}${apiSuffix}`);
-      const data: SalaConfig = await res.json();
-      setConfig(data);
-      setLogoPreview(data.logoCliente ?? null);
+      const data = await res.json();
+      if (res.ok && data.salaId) { setConfig(data); setLogoPreview(data.logoCliente ?? null); }
+      else setConfig(defaultConfig(salaId));
     } catch { setConfig(defaultConfig(salaId)); }
     finally { setLoading(false); }
   }
 
   async function fetchLogos() {
     const res = await fetch(`/api/logos?dummy=1${apiSuffix}`);
-    setLogos(await res.json());
+    const data = await res.json();
+    setLogos(Array.isArray(data) ? data : []);
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
