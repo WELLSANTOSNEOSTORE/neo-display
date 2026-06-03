@@ -12,7 +12,9 @@ export function middleware(req: NextRequest) {
 
   const autenticado = req.cookies.get("neo_auth")?.value === "ok";
   if (!autenticado) {
-    return NextResponse.redirect(new URL("/admin/login", req.url));
+    const login = new URL("/admin/login", req.url);
+    login.searchParams.set("next", req.nextUrl.pathname + req.nextUrl.search);
+    return NextResponse.redirect(login);
   }
   return NextResponse.next();
 }
