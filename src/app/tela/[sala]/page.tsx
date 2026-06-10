@@ -32,6 +32,7 @@ export default function TelaPage() {
   const [scale, setScale] = useState(1);
 
   const isPortrait = config?.orientacao === "portrait";
+  const isDirectional = ["inter", "rooftop"].includes(sala);
   const advanceSlide = useCallback((total: number) => setSlide((p) => (p + 1) % total), []);
 
   useEffect(() => {
@@ -60,12 +61,13 @@ export default function TelaPage() {
   }, [fetchConfig]);
 
   useEffect(() => {
-    const total = 2 + (config?.mostrarInfoEvento ? 1 : 0) + (config?.mostrarVideo && config?.videoUrl ? 1 : 0);
-    const slideVideo = (config?.mostrarInfoEvento ? 3 : 2);
+    const base = isDirectional ? 1 : 2;
+    const total = base + (config?.mostrarInfoEvento ? 1 : 0) + (config?.mostrarVideo && config?.videoUrl ? 1 : 0);
+    const slideVideo = base + (config?.mostrarInfoEvento ? 1 : 0);
     if (config?.mostrarVideo && config?.videoUrl && slide === slideVideo) return;
     const t = setTimeout(() => advanceSlide(total), (DURATIONS[slide] ?? 5000) - 500);
     return () => clearTimeout(t);
-  }, [slide, config?.mostrarInfoEvento, config?.mostrarVideo, config?.videoUrl, advanceSlide]);
+  }, [slide, isDirectional, config?.mostrarInfoEvento, config?.mostrarVideo, config?.videoUrl, advanceSlide]);
 
   if (!config) return (
     <div className="w-screen h-screen bg-black flex items-center justify-center">
@@ -73,10 +75,11 @@ export default function TelaPage() {
     </div>
   );
 
-  const totalSlides = 2 + (config.mostrarInfoEvento ? 1 : 0) + (config.mostrarVideo && config.videoUrl ? 1 : 0);
-  const slideVideo = config.mostrarInfoEvento ? 3 : 2;
+  const base = isDirectional ? 1 : 2;
+  const totalSlides = base + (config.mostrarInfoEvento ? 1 : 0) + (config.mostrarVideo && config.videoUrl ? 1 : 0);
+  const slideVideo = base + (config.mostrarInfoEvento ? 1 : 0);
   const nomeSala = NOME_SALA[sala] ?? "SALA";
-  const slideClaro = slide === 0 || (config.mostrarInfoEvento && slide === 2);
+  const slideClaro = (!isDirectional && slide === 0) || (config.mostrarInfoEvento && slide === base);
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-black" style={{ position: "relative" }}>
@@ -90,11 +93,13 @@ export default function TelaPage() {
         <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           {["inter", "rooftop"].includes(sala) ? <SlideInter nomeSala={nomeSala} /> : <Slide1 mensagem={config.mensagemBoasVindas} />}
         </div>
-        <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 1 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-          <Slide2 />
-        </div>
+        {!isDirectional && (
+          <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 1 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+            <Slide2 />
+          </div>
+        )}
         {config.mostrarInfoEvento && (
-          <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 2 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+          <div className={`absolute inset-0 transition-opacity duration-500 ${slide === base ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
             <Slide3 logoCliente={config.logoCliente} nomeSala={nomeSala} />
           </div>
         )}
