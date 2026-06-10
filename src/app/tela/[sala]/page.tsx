@@ -88,7 +88,7 @@ export default function TelaPage() {
         transform: `scale(${scale})`, transformOrigin: "center center", overflow: "hidden",
       }}>
         <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-          <Slide1 mensagem={config.mensagemBoasVindas} />
+          {["inter", "rooftop"].includes(sala) ? <SlideInter /> : <Slide1 mensagem={config.mensagemBoasVindas} />}
         </div>
         <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 1 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           <Slide2 />
@@ -128,6 +128,27 @@ function Slide2() {
     <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: "#E8440A" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/ibis-logo.png" alt="ibis" className="object-contain h-96" />
+    </div>
+  );
+}
+
+function SlideInter() {
+  return (
+    <div className="w-full h-full flex flex-col font-black text-white" style={{ backgroundColor: "#E8440A" }}>
+      <div className="flex-1 flex flex-col items-center justify-center gap-6">
+        <span style={{ fontSize: "180px", lineHeight: 1 }}>←</span>
+        <span style={{ fontSize: "120px", letterSpacing: "10px" }}>SALA</span>
+      </div>
+      <div className="flex items-center justify-center py-6 gap-6 px-16">
+        <div className="h-px flex-1 bg-white/30" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/ibis-logo.png" alt="ibis" className="h-14 object-contain opacity-90" />
+        <div className="h-px flex-1 bg-white/30" />
+      </div>
+      <div className="flex-1 flex flex-col items-center justify-center gap-6">
+        <span style={{ fontSize: "100px", letterSpacing: "6px" }}>BANHEIRO</span>
+        <span style={{ fontSize: "180px", lineHeight: 1 }}>→</span>
+      </div>
     </div>
   );
 }
