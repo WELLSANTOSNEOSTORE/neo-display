@@ -88,7 +88,7 @@ export default function TelaPage() {
         transform: `scale(${scale})`, transformOrigin: "center center", overflow: "hidden",
       }}>
         <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 0 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-          {["inter", "rooftop"].includes(sala) ? <SlideInter /> : <Slide1 mensagem={config.mensagemBoasVindas} />}
+          {["inter", "rooftop"].includes(sala) ? <SlideInter nomeSala={nomeSala} /> : <Slide1 mensagem={config.mensagemBoasVindas} />}
         </div>
         <div className={`absolute inset-0 transition-opacity duration-500 ${slide === 1 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           <Slide2 />
@@ -132,22 +132,37 @@ function Slide2() {
   );
 }
 
-function SlideInter() {
+function Chevron({ direction, color }: { direction: "left" | "right"; color: string }) {
+  const clip =
+    direction === "left"
+      ? "polygon(100% 0%, 28% 0%, 0% 50%, 28% 100%, 100% 100%, 72% 50%)"
+      : "polygon(0% 0%, 72% 0%, 100% 50%, 72% 100%, 0% 100%, 28% 50%)";
+  return <div style={{ width: 52, height: 88, backgroundColor: color, clipPath: clip, flexShrink: 0 }} />;
+}
+
+function SlideInter({ nomeSala }: { nomeSala: string }) {
+  const leftColors = ["#4acf4a", "#35b535", "#268a26", "#1a5c1a"];
+  const rightColors = ["#d45500", "#e87000", "#f59000", "#f8b400"];
+
   return (
     <div className="w-full h-full flex flex-col font-black text-white" style={{ backgroundColor: "#E8440A" }}>
-      <div className="flex-1 flex flex-col items-center justify-center gap-6">
-        <span style={{ fontSize: "180px", lineHeight: 1 }}>←</span>
-        <span style={{ fontSize: "120px", letterSpacing: "10px" }}>SALA</span>
+      <div className="flex-1 flex items-center justify-center gap-6 px-12">
+        <div className="flex gap-1">
+          {leftColors.map((c, i) => <Chevron key={i} direction="left" color={c} />)}
+        </div>
+        <span style={{ fontSize: "88px", letterSpacing: "6px", whiteSpace: "nowrap" }}>{nomeSala}</span>
       </div>
-      <div className="flex items-center justify-center py-6 gap-6 px-16">
-        <div className="h-px flex-1 bg-white/30" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/ibis-logo.png" alt="ibis" className="h-14 object-contain opacity-90" />
-        <div className="h-px flex-1 bg-white/30" />
+      <div className="flex items-center justify-center py-6">
+        <div className="bg-white rounded-3xl p-5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/ibis-logo.png" alt="ibis" className="h-28 object-contain" />
+        </div>
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center gap-6">
-        <span style={{ fontSize: "100px", letterSpacing: "6px" }}>BANHEIRO</span>
-        <span style={{ fontSize: "180px", lineHeight: 1 }}>→</span>
+      <div className="flex-1 flex items-center justify-center gap-6 px-12">
+        <span style={{ fontSize: "88px", letterSpacing: "6px", whiteSpace: "nowrap" }}>BANHEIROS</span>
+        <div className="flex gap-1">
+          {rightColors.map((c, i) => <Chevron key={i} direction="right" color={c} />)}
+        </div>
       </div>
     </div>
   );
